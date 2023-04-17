@@ -1,0 +1,154 @@
+---
+version: "3.3"
+# v0.1
+# updated: 2021/12/28
+# docker-compose with .env for ubuntu server
+
+services:
+
+  duckdns:
+    image: ghcr.io/linuxserver/duckdns:latest
+    container_name: duckdns
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - SUBDOMAINS=${DDNSDOMAIN}
+      - TOKEN=${DDNSTOKEN}
+      - LOG_FILE=true #optional
+    volumes:
+      - /media/docker/duckdns:/config #optional
+    restart: unless-stopped
+    
+  sabnzbd:
+    image: ghcr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /media/docker/sabnzbd:/config
+      - ${DOWNLOADS}:/downloads
+      - ${INCOMPLETE}:/downloads/incomplete
+    ports:
+      - 38080:8080
+      - 39090:9090
+    restart: unless-stopped
+
+  radarr:
+    image: ghcr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /media/docker/radarr:/config
+      - ${VIDEO}:/movies
+      - ${DOWNLOADS}:/downloads
+    ports:
+      - 37878:7878
+    restart: unless-stopped
+
+  sonarr:
+    image: ghcr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=022 #optional
+    volumes:
+      - /media/docker/sonarr:/config
+      - ${TV}:/tv
+      - ${DOWNLOADS}:/downloads
+    ports:
+      - 38989:8989
+    restart: unless-stopped
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - /media/docker/portainer2:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 9000:9000
+    restart: unless-stopped
+
+  hydra2:
+    image: ghcr.io/linuxserver/nzbhydra2
+    container_name: nzbhydra2
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /media/docker/nzbhydra2:/config
+      - ${DOWNLOADS}:/downloads
+    ports:
+      - 5076:5076
+    restart: unless-stopped
+
+  plex:
+    container_name: plex--linuxserver
+    hostname: plex
+    image: ghcr.io/linuxserver/plex
+    restart: unless-stopped
+    network_mode: host
+    devices:
+      - "/dev/dri:/dev/dri"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - VERSION=latest
+#      - PLEX_CLAIM= #optional
+      - 32400:32400
+      - 1900:1900/udp
+      - 3005:3005
+      - 5353:5353/udp
+      - 8324:8324
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+      - 32469:32469
+    volumes:
+      - /media/docker/plex:/config
+      - ${VIDEO}:/movies
+      - ${TV}:/tv
+      - /tmp:/temp_transcode
+
+  tautulli:
+    container_name: tautulli
+    hostname: tautulli
+    image: ghcr.io/linuxserver/tautulli
+    restart: unless-stopped
+    network_mode: bridge
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /media/docker/tautulli:/config
+      - /media/docker/plex/Library/Application Support/Plex Media Server/Logs:/logs
+    ports:
+      - 38181:8181
+
+  organizr:
+    image: organizr/organizr
+    container_name: organizr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /media/docker/organizr:/config
+    ports:
+      - 9983:80
+    restart: unless-stopped
