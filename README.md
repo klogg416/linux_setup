@@ -41,7 +41,7 @@ network:
   version: 2
   ```
   
-Carrying on
+# carrying on
 ```shell
 sudo apt install docker.io docker-compose cifs-utils unattended-upgrades samba glances
 sudo groupadd docker
