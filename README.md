@@ -13,7 +13,7 @@ sudo apt autoremove -y
 sudo reboot
 ```
 
-# If an unplugged network adaptor delays boot
+# if an unplugged network adaptor delays boot
 Need to make NICs optional in `netplan`. See which files are in `/etc/netplan`, then edit the one in there.
 ```shell
 $ ll /etc/netplan/
@@ -43,9 +43,39 @@ network:
   
 Carrying on
 ```shell
-sudo apt install docker.io docker-compose cifs-utils
+sudo apt install docker.io docker-compose cifs-utils unattended-upgrades samba glances
 sudo groupadd docker
 sudo usermod -a -G docker kyle
+
+# configure up unattended upgrades
+sudo nano  /etc/apt/apt.conf.d/50unattended-upgrades
+sudo nano /etc/apt/apt.conf.d/10periodic
+
+# install nvidia GPU drivers
+# list available drivers, select the "recommended" one
+ubuntu-drivers devices
+sudo apt install nvidia-driver-525-open
+```
+
+`ubuntu-drivers devices` output
+```shell
+$ ubuntu-drivers devices
+== /sys/devices/pci0000:00/0000:00:03.1/0000:08:00.0 ==
+modalias : pci:v000010DEd00002184sv00001462sd00003790bc03sc00i00
+vendor   : NVIDIA Corporation
+model    : TU116 [GeForce GTX 1660]
+driver   : nvidia-driver-525 - distro non-free
+driver   : nvidia-driver-470 - distro non-free
+driver   : nvidia-driver-418-server - distro non-free
+driver   : nvidia-driver-515-server - distro non-free
+driver   : nvidia-driver-515-open - distro non-free
+driver   : nvidia-driver-510 - distro non-free
+driver   : nvidia-driver-450-server - distro non-free
+driver   : nvidia-driver-525-server - distro non-free
+driver   : nvidia-driver-470-server - distro non-free
+driver   : nvidia-driver-525-open - distro non-free recommended
+driver   : nvidia-driver-515 - distro non-free
+driver   : xserver-xorg-video-nouveau - distro free builtin
 ```
 
 # free up port 53
@@ -81,5 +111,13 @@ sudo sysctl -w dev.raid.speed_limit_min=50000
 # confirm increase took
 sysctl dev.raid.speed_limit_min
 ```
-  
+
+# install a web dashboard
+```shell
+sudo apt install -t ${VERSION_CODENAME}-backports cockpit
+sudo apt install cockpit-machines pcp cockpit-pcp packagekit virt-viewer
+sudo systemctl enable --now cockpit.socket
+sudo systemctl enable --now pmcd
+sudo systemctl enable --now pmlogger
+```
   
