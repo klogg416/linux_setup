@@ -159,3 +159,6 @@ sudo systemctl enable --now pmcd
 sudo systemctl enable --now pmlogger
 ```
   
+# nvidia GPU with plex
+<https://tizutech.com/plex-transcoding-with-docker-nvidia-gpu/>
+Document it.
