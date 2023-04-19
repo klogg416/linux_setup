@@ -54,7 +54,7 @@ sudo nano /etc/apt/apt.conf.d/10periodic
 # install nvidia GPU drivers
 # list available drivers, select the "recommended" one
 ubuntu-drivers devices
-sudo apt install nvidia-driver-525-open
+sudo apt install nvidia-driver-525-open nvidia-cuda-toolkit
 ```
 
 `ubuntu-drivers devices` output
