@@ -162,3 +162,43 @@ sudo systemctl enable --now pmlogger
 # nvidia GPU with plex
 <https://tizutech.com/plex-transcoding-with-docker-nvidia-gpu/>
 Document it.
+```shell
+# Search apt for NVIDIA drivers.
+sudo apt search nvidia-driver
+# At the time of writing the latest driver is 510.
+
+# Install the latest headless drivers.
+sudo apt install nvidia-headless-driver-510
+
+# Search apt for libnvidia-encode.
+sudo apt search nvidia-encode
+
+# Install the latest libnvidia-encode package.
+sudo apt install libnvidia-encode-510
+
+# Install nvidia-utils package for nvidia-smi command.
+sudo apt install nvidia-utils-510
+```
+
+NVIDIA container toolkit
+After installing the drivers we need to install the NVIDIA container toolkit. More information about the NVIDIA container toolkit can be found on the [NVIDIA docs site]<https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html>.
+
+Setting up the package repository. **Find the current instructions for the Ubuntu LTS build.**  
+Without the PGP keys the next steps won't work.
+
+```shell
+Installing the NVIDIA container toolkit
+# Update apt.
+sudo apt-get update
+
+# Install the nvidia-docker2 package.
+sudo apt-get install -y nvidia-docker2
+
+# Restart Docker.
+sudo systemctl restart docker
+
+# Test the GPU with a base CUDA container.
+sudo docker run --rm --gpus all nvidia/cuda:11.0.3-base-ubuntu20.04 nvidia-smi
+```
+
+It took me quite a while to get this setup working correctly. The most important thing I was missing was the libnvidia-encode package. I hope this post helps you out getting the NVIDIA transcoding working in Plex. <https://tizutech.com/plex-transcoding-with-docker-nvidia-gpu/?unapproved=271&moderation-hash=6cfaad702e8f6bbab2c2665e4c633aad#comment-271>
