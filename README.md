@@ -165,19 +165,19 @@ Document it.
 ```shell
 # Search apt for NVIDIA drivers.
 sudo apt search nvidia-driver
-# At the time of writing the latest driver is 510.
+# At the time of writing the latest driver is 530.
 
 # Install the latest headless drivers.
-sudo apt install nvidia-headless-driver-510
+sudo apt install nvidia-headless-530
 
 # Search apt for libnvidia-encode.
 sudo apt search nvidia-encode
 
 # Install the latest libnvidia-encode package.
-sudo apt install libnvidia-encode-510
+sudo apt install libnvidia-encode-530
 
 # Install nvidia-utils package for nvidia-smi command.
-sudo apt install nvidia-utils-510
+sudo apt install nvidia-utils-530
 ```
 
 NVIDIA container toolkit
