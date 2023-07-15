@@ -1,0 +1,126 @@
+# .env file
+# PUID=1029
+# PGID=65538
+# TZ=America/Toronto
+# DOWNLOADS=/volume1/downloads
+# INCOMPLETE=/volume1/downloads/incomplete
+# INCOMING=/volume1/downloads/incoming
+# APPDATA=/volume2/docker
+# VIDEO=/volume1/video
+
+version: "3"
+
+services:
+  adGuardHome:
+    container_name: adGuard-synology
+    hostname: adGuard-synology
+    image: adguard/adguardhome
+    mac_address: '02:42:C0:A8:0A:12'
+    # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
+    ports:
+      - 53/tcp
+      - 53/udp
+    #  - 67/udp # Only required if you are using Pi-hole as your DHCP server
+    #  - 68/tcp # Only required if you are using Pi-hole as your DHCP server
+    #  - 68/udp # Only required if you are using Pi-hole as your DHCP server
+      - 80/tcp
+      - 443/tcp
+      - 443/udp
+      - 3000/tcp
+    #  - 853/tcp
+    #  - 853/udp
+    #  - 784/udp
+    #  - 8853/udp
+    #  - 5443/tcp
+    #  - 5443/udp
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${APPDATA}/adguardhome/work:/opt/adguardhome/work
+      - ${APPDATA}/adguardhome/config:/opt/adguardhome/conf
+    cap_add:
+      - NET_ADMIN # Required if you are using AdGuard as your DHCP server, else not needed
+    networks:
+      macvlan:
+        ipv4_address: '192.168.10.18'
+      frontend:
+    restart: unless-stopped
+
+  sabnzbd:
+    image: ghcr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${APPDATA}/sabnzbd:/config
+      - ${DOWNLOADS}:/downloads
+      - ${INCOMPLETE}:/downloads/incomplete
+      - /volume1/system/temp/:/xyz
+    ports:
+      - 38080:8080
+      - 39090:9090
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:develop
+    container_name: sonarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      #- UMASK_SET=022 #optional
+    volumes:
+      - ${APPDATA}/sonarr:/config
+      - ${VIDEO}:/video
+      - ${DOWNLOADS}:/downloads
+    ports:
+      - 38989:8989
+    restart: unless-stopped
+
+  radarr_remux:
+    image: lscr.io/linuxserver/radarr
+    container_name: radarr_remux
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${APPDATA}/radarr-remux:/config
+  #    - ${APPDATA}/nzbToMedia:/scripts
+      - ${DOWNLOADS}:/downloads
+      - ${VIDEO}:/video
+    ports:
+      - 57878:7878/tcp
+    restart: unless-stopped
+
+  # nextcloud:
+  #   image: lscr.io/linuxserver/nextcloud:latest
+  #   container_name: nextcloud
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #   volumes:
+  #     - ${APPDATA}/nextcloud:/config
+  #     - /volume1/homes/kjewett/nextcloud_data:/data
+  #     - /volume1/homes/kjewett/Documents:/data/KJ_docs
+  #     - /volume1/work_docs:/data/work_docs
+  #   ports:
+  #     - 3443:443
+  #   restart: unless-stopped
+
+networks:
+  frontend:
+    external: true
+  macvlan:
+    name: ad_net
+    driver: macvlan
+    driver_opts:
+      parent: eth4
+    ipam:
+      config:
+        - subnet: 192.168.10.0/24
+          ip_range: 192.168.10.18/31
+          gateway: 192.168.10.1
